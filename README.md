@@ -36,3 +36,9 @@ https://magazine.sebastianraschka.com/p/understanding-and-coding-self-attention
 
 https://magazine.sebastianraschka.com/p/accelerating-pytorch-model-training
 
+
+https://discuss.pytorch.org/t/imagenet-example-accuracy-calculation/7840/9
+
+https://gist.github.com/weiaicunzai/2a5ae6eac6712c70bde0630f3e76b77b
+
+https://github.com/bearpaw/pytorch-classification/blob/24f1c456f48c78133088c4eefd182ca9e6199b03/cifar.py#L23

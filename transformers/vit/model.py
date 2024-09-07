@@ -42,7 +42,7 @@ class VitBlock(nn.Module):
     def __init__(self, num_hiddens, norm_shape, mlp_num_hiddens, num_heads, dropout, use_bias=False):
         super().__init__()
         self.ln1 = nn.LayerNorm(norm_shape)
-        self.attention = nn.MultiheadAttention(num_hiddens, num_heads, dropout=dropout)
+        self.attention = nn.MultiheadAttention(num_hiddens, num_heads)
         self.ln2 = nn.LayerNorm(norm_shape)
         self.mlp = VitMLP(mlp_num_hiddens, num_hiddens, dropout)
 
