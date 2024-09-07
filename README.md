@@ -10,6 +10,29 @@ Links to articles on web on latest developments in computer vision and ML
 
 ### COMPUTER VISION
 
+* [An image is worth more than 16x16 pixels](https://arxiv.org/abs/2406.09415)
+
+* [MOCO](https://github.com/facebookresearch/moco/tree/main)
+
 * [COMPUTER VISION PIPELINE 2.0](https://medium.com/@tenyks_blogger/computer-vision-is-already-evolving-3cd0e63e805b)
 
 * [WHAT IS JOINT EMBEDDING](https://www.turingpost.com/p/jepa)
+
+
+### References
+
+* [torchvision ViT model](https://github.com/pytorch/vision/blob/main/torchvision/models/vision_transformer.py)
+
+https://github.com/Tony-Y/pytorch_warmup
+
+https://gist.github.com/Tony-Y/03e47588bae2e2bfd69815d046d994ec
+
+Using lightning ai to train VIT:
+
+https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/11-vision-transformer.html
+
+
+https://magazine.sebastianraschka.com/p/understanding-and-coding-self-attention
+
+https://magazine.sebastianraschka.com/p/accelerating-pytorch-model-training
+
