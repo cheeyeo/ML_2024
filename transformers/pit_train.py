@@ -13,7 +13,7 @@ import torchvision.transforms.functional as F
 import torchmetrics
 from torchmetrics.classification import MulticlassAccuracy
 from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
-from sklearn.metrics import top_k_accuracy_score
+import torchinfo
 from vit.model import ViT
 
 
@@ -138,6 +138,8 @@ if __name__ == "__main__":
         blk_dropout,
         num_classes=num_classes
     )
+
+    torchinfo.summary(model, input_size=(batch_size, 3, 32, 32))
 
     model = torch.compile(model)
     model.to(device)

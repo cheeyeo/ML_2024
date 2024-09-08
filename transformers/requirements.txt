@@ -6,3 +6,4 @@ pytorch-lightning==1.9.5
 lightning-bolts==0.7.0
 scikit-learn==1.5.1
 lightning==2.4.0
+torchinfo==1.8.0
