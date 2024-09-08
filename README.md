@@ -23,22 +23,13 @@ Links to articles on web on latest developments in computer vision and ML
 
 * [torchvision ViT model](https://github.com/pytorch/vision/blob/main/torchvision/models/vision_transformer.py)
 
-https://github.com/Tony-Y/pytorch_warmup
 
-https://gist.github.com/Tony-Y/03e47588bae2e2bfd69815d046d994ec
+* [Using lightning ai to train VIT](https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/11-vision-transformer.html)
 
-Using lightning ai to train VIT:
+* [On coding Self-Attention](https://magazine.sebastianraschka.com/p/understanding-and-coding-self-attention)
 
-https://lightning.ai/docs/pytorch/stable/notebooks/course_UvA-DL/11-vision-transformer.html
+* [Accelerating Pytorch model training](https://magazine.sebastianraschka.com/p/accelerating-pytorch-model-training)
 
-
-https://magazine.sebastianraschka.com/p/understanding-and-coding-self-attention
-
-https://magazine.sebastianraschka.com/p/accelerating-pytorch-model-training
+* [Example of top-k calculations](https://github.com/bearpaw/pytorch-classification/blob/24f1c456f48c78133088c4eefd182ca9e6199b03/cifar.py#L23)
 
 
-https://discuss.pytorch.org/t/imagenet-example-accuracy-calculation/7840/9
-
-https://gist.github.com/weiaicunzai/2a5ae6eac6712c70bde0630f3e76b77b
-
-https://github.com/bearpaw/pytorch-classification/blob/24f1c456f48c78133088c4eefd182ca9e6199b03/cifar.py#L23

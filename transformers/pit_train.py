@@ -1,4 +1,6 @@
 import numpy as np
+import lightning as L
+from lightning import Fabric
 import torch
 import torchvision
 import torch.optim as optim
@@ -8,8 +10,10 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as F
-import pytorch_warmup as warmup
 import torchmetrics
+from torchmetrics.classification import MulticlassAccuracy
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
+from sklearn.metrics import top_k_accuracy_score
 from vit.model import ViT
 
 
@@ -37,26 +41,31 @@ def show(imgs, means, stds):
 
 
 if __name__ == "__main__":
+    torch.set_float32_matmul_precision("medium")
+
+    L.seed_everything(123)
+
     # MODEL CONFIG FOR PIT model based on paper
     img_size = 32
     patch_size = 1
     num_hiddens = 192
     mlp_num_hiddens = 768
-    num_heads = 8
+    num_heads = 12
     num_blks = 12
     emb_dropout = 0.1
     blk_dropout = 0.1
     lr = 0.004
     weight_decay = 0.3
-    batch_size = 64
-    # batch_size = 1024 # actual batch size used...
+    batch_size = 128
+    # batch_size = 1024 # actual batch size used in paper...
     num_classes = 100
+    warmup_epochs = 20
     epochs = 2400
 
     stats = ((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
 
     train_transforms = transforms.Compose([
-        transforms.RandomResizedCrop(32, scale=(0.2, 1.0)),
+        transforms.RandomResizedCrop(img_size, scale=(0.2, 1.0)),
         transforms.RandomGrayscale(p=0.2),
         transforms.ColorJitter(0.4, 0.4, 0.4, 0.4),
         transforms.RandomHorizontalFlip(),
@@ -98,10 +107,18 @@ if __name__ == "__main__":
         num_workers=2
     )
 
+    # Setup Fabric
+    fabric = Fabric(accelerator="cuda", devices=1, precision="bf16-mixed")
+    
+    fabric.launch()
+
+    trainloader, testloader = fabric.setup_dataloaders(
+        trainloader, testloader
+    )
+
     # visualize some training data
     dataiter = iter(trainloader)
     images, labels = next(dataiter)
-    print(images.shape)
     imgs = images[:4]
     print(imgs.shape)
     print(labels.shape)
@@ -123,72 +140,60 @@ if __name__ == "__main__":
     )
 
     model = torch.compile(model)
-
     model.to(device)
-
-    criterion = nn.CrossEntropyLoss()
 
     # create optimizer
     optimizer = optim.AdamW(model.parameters(), lr=lr, betas=(0.9, 0.95), weight_decay=weight_decay)
-    print(optimizer)
 
-    warmup_steps = len(trainloader) * 20
-    num_steps = len(trainloader) * epochs - warmup_steps
-    print(f"NUM STEPS: {num_steps}, WARMUP STEPS: {warmup_steps}")
+    model, optimizer = fabric.setup(model, optimizer)
+
+    criterion = nn.CrossEntropyLoss()
 
     # Linear warmup as in paper
-    warmup_scheduler = warmup.LinearWarmup(optimizer, warmup_steps)
-    lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_steps, eta_min=1e-6)
+    scheduler = LinearWarmupCosineAnnealingLR(
+        optimizer,
+        warmup_epochs=warmup_epochs,
+        max_epochs=epochs,
+        warmup_start_lr=lr,
+        eta_min=1e-6
+    )
 
     for epoch in range(epochs):
         train_loss = 0.0
 
         model.train()
-
         for i, data in enumerate(trainloader, 0):
+            model.train()
             inputs, labels = data[0].to(device, non_blocking=True), data[1].to(device, non_blocking=True)
 
             optimizer.zero_grad()
 
             yhat = model(inputs)
             loss = criterion(yhat, labels)
-            loss.backward()
+            fabric.backward(loss)
             optimizer.step()
 
             train_loss += loss.item()
 
-            with warmup_scheduler.dampening():
-                if warmup_scheduler.last_step + 1 >= warmup_steps:
-                    print('WARMUP ENDED. Running LR scheduler')
-                    lr_scheduler.step()
-
             if i > 0 and i % 256 == 0:    # print every 256 mini-batches
-                print(f'[Epoch: {epoch + 1}, {i + 1:5d}] Batch loss: {train_loss / i:.2f}')
+                print(f'[Epoch: {epoch + 1}, {i}] Batch loss: {train_loss / i:.2f}')
         
         print(f"Epoch: {epoch + 1}, Loss: {train_loss:.2f}, Train Loss: {train_loss / len(trainloader):.2f}")
 
-        # Run eval?
-        model.eval()
+        # Run eval
         with torch.no_grad():
-            top1_val_acc = torchmetrics.Accuracy(
-                task="multiclass",
-                num_classes=num_classes
-            ).to(device)
+            model.eval()
 
-            # top5_val_acc = torchmetrics.Accuracy(
-            #     task="multiclass",
-            #     num_classes=num_classes,
-            #     top_k=5
-            # ).to(device)
+            test_acc = MulticlassAccuracy(num_classes=num_classes).to(device)
 
             for (features, targets) in testloader:
                 features = features.to(device)
                 targets = targets.to(device)
                 outputs = model(features)
-                predicted_labels = torch.argmax(outputs, 1)
-                top1_val_acc.update(predicted_labels, targets)
-                # top5_val_acc.update(predicted_labels, targets)
+                prediction = torch.argmax(outputs, 1)
+                test_acc.update(prediction, targets)
             
-            print(f"Epoch: {epoch+1}, Top-1 Acc: {top1_val_acc.compute()*100:.2f}%")
-            top1_val_acc.reset()
-            # top5_val_acc.reset()
+            fabric.print(test_acc.compute())
+            fabric.print(f"Epoch: {epoch+1}, Acc: {test_acc.compute() * 100}%")
+        
+        scheduler.step()

@@ -15,8 +15,7 @@ class PatchEmbedding(nn.Module):
         patch_size = _make_tuple(patch_size)
 
         self.num_patches = (img_size[0] // patch_size[0]) * (img_size[1] // patch_size[1])
-
-        self.conv = nn.LazyConv2d(num_hiddens, kernel_size=patch_size, stride=patch_size)
+        self.conv = nn.Conv2d(in_channels=3, out_channels=num_hiddens, kernel_size=patch_size, stride=patch_size)
 
     def forward(self, x):
         return self.conv(x).flatten(2).transpose(1, 2)
@@ -42,7 +41,7 @@ class VitBlock(nn.Module):
     def __init__(self, num_hiddens, norm_shape, mlp_num_hiddens, num_heads, dropout, use_bias=False):
         super().__init__()
         self.ln1 = nn.LayerNorm(norm_shape)
-        self.attention = nn.MultiheadAttention(num_hiddens, num_heads)
+        self.attention = nn.MultiheadAttention(num_hiddens, num_heads, dropout=dropout)
         self.ln2 = nn.LayerNorm(norm_shape)
         self.mlp = VitMLP(mlp_num_hiddens, num_hiddens, dropout)
 
