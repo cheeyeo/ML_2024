@@ -104,7 +104,7 @@ if __name__ == "__main__":
         testset,
         batch_size=batch_size,
         shuffle=False,
-        num_workers=2
+        num_workers=4
     )
 
     # Setup Fabric
@@ -180,7 +180,7 @@ if __name__ == "__main__":
             if i > 0 and i % 256 == 0:    # print every 256 mini-batches
                 print(f'[Epoch: {epoch + 1}, {i}] Batch loss: {train_loss / i:.2f}')
         
-        print(f"Epoch: {epoch + 1}, Loss: {train_loss:.2f}, Train Loss: {train_loss / len(trainloader):.2f}")
+        print(f"Epoch: {epoch + 1}, Train Loss: {train_loss / len(trainloader):.2f}")
 
         # Run eval
         with torch.no_grad():

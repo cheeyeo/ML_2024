@@ -1,6 +1,6 @@
 ### ML LINKS 2024
 
-Links to articles on web on latest developments in computer vision and ML
+Links to papers and articles on latest developments in computer vision and ML.
 
 
 ### ATTENTION, TRANSFORMERS
@@ -10,9 +10,16 @@ Links to articles on web on latest developments in computer vision and ML
 
 ### COMPUTER VISION
 
+#### Papers
+
 * [An image is worth more than 16x16 pixels](https://arxiv.org/abs/2406.09415)
 
+* [Three things everyone should know about Vision Transformers](https://arxiv.org/abs/2203.09795)
+
 * [MOCO](https://github.com/facebookresearch/moco/tree/main)
+
+
+#### Articles
 
 * [COMPUTER VISION PIPELINE 2.0](https://medium.com/@tenyks_blogger/computer-vision-is-already-evolving-3cd0e63e805b)
 
